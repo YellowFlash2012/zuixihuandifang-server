@@ -108,4 +108,27 @@ router.post('/', (req, res, next) => {
     res.status(201).json({place:createdPlace})
 });
 
+// ***edit an existing place****
+router.patch("/:pid", (req, res, next) => {
+    const { title, description } = req.body;
+    const placeId = req.params.pid;
+
+    const placeToUpdate = { ...places.find(p => p.id === placeId) };
+
+    const placeIndex = places.findIndex(p => p.id === placeId);
+
+    placeToUpdate.title = title;
+    placeToUpdate.description = description;
+
+    places[placeIndex] = placeToUpdate;
+
+    // 201 is for created items
+    res.status(200).json({ place: placeToUpdate });
+})
+
+// ****delete a place*****
+router.delete("/:pid", (req, res, next) => {
+    
+})
+
 module.exports = router;

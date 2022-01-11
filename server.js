@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const placesRoutes = require('./routes/places');
 
 const usersRoutes = require('./routes/users');
+const HttpError = require("./models/http-error");
 
 const app = express();
 
@@ -14,6 +15,12 @@ app.use('/api/places', placesRoutes);
 
 app.use('/api/users', usersRoutes);
 
+//*** wrong route error handling***
+app.use((req, res, next) => {
+    const error = new HttpError('Could NOT find this page', 404);
+
+    throw error;
+})
 
 // error handling middleware
 app.use((error, req, res, next) => {
