@@ -8,6 +8,8 @@ const usersRoutes = require('./routes/users');
 
 const app = express();
 
+app.use(bodyParser.json());
+
 app.use('/api/places', placesRoutes);
 
 app.use('/api/users', usersRoutes);

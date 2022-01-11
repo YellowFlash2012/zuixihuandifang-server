@@ -1,5 +1,7 @@
 const express = require("express");
 
+const { v4:uuidv4 } = require("uuid");
+
 const HttpError = require("../models/http-error");
 
 const router = express.Router();
@@ -49,6 +51,7 @@ const places = [
     },
 ];
 
+//***** get places by id *******
 router.get("/:pid", (req, res, next) => {
     const placeId = req.params.pid; //{pid:'p1}
     const place = places.find((p) => {
@@ -64,6 +67,9 @@ router.get("/:pid", (req, res, next) => {
 
     res.json({ place: place });
 });
+
+
+// *****get places by userId *****
 
 router.get("/user/:uid", (req, res, next) => {
     const userId = req.params.uid;
@@ -82,6 +88,24 @@ router.get("/user/:uid", (req, res, next) => {
     }
 
     res.json({ user: userPlaces });
+});
+
+// *****create new place******
+router.post('/', (req, res, next) => {
+    const { title, description, coordinates, address, creator } = req.body;
+
+    const createdPlace = {
+        id:uuidv4(),
+        title,
+        description,
+        location: coordinates,
+        address,
+        creator
+    }
+
+    places.push(createdPlace);
+
+    res.status(201).json({place:createdPlace})
 });
 
 module.exports = router;
