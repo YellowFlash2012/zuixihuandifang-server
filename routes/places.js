@@ -1,5 +1,7 @@
 const express = require("express");
 
+const HttpError = require("../models/http-error");
+
 const router = express.Router();
 
 const places = [
@@ -49,20 +51,34 @@ const places = [
 
 router.get("/:pid", (req, res, next) => {
     const placeId = req.params.pid; //{pid:'p1}
-    const place = places.find(p => {
+    const place = places.find((p) => {
         return p.id === placeId;
-    })
+    });
+
+    if (!place) {
+        throw new HttpError(
+            "Can't find a place that satisfies your request. Try with another ID",
+            404
+        );
+    }
+
     res.json({ place: place });
 });
 
 router.get("/user/:uid", (req, res, next) => {
     const userId = req.params.uid;
+
     const userPlaces = places.filter((u) => {
         return u.creator === userId;
     });
 
     if (userPlaces.length === 0) {
-        res.json({errorMsg:"Can't find anything related to that user. Try another one!"})
+        return next(
+            new HttpError(
+                "Can't find anything related to that user. Try another one!",
+                404
+            )
+        );
     }
 
     res.json({ user: userPlaces });
