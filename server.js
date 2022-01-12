@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 
 const placesRoutes = require('./routes/places');
 
+const mongoose = require("mongoose");
+let dotenv = require("dotenv").config();
+
 const usersRoutes = require('./routes/users');
 
 const HttpError = require("./models/http-error");
@@ -34,6 +37,14 @@ app.use((error, req, res, next) => {
     res.json({ msg: error.message || "An unknown error occurred!" });
 });
 
-app.listen(5000, () => {
-    console.log("Server on | Port 5000");
-})
+// ****db connection****
+mongoose
+    .connect(process.env.MONGO_URI)
+    .then(
+        app.listen(5000, () => {
+            console.log("Server on | Port 5000");
+            console.log("db connected!");
+        })
+    )
+    .catch();
+
