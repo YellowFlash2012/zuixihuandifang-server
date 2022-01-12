@@ -6,7 +6,7 @@ const HttpError = require("../models/http-error");
 
 const router = express.Router();
 
-const places = [
+let places = [
     {
         id: "p1",
         title: "Mount Kilimandjaro",
@@ -128,7 +128,10 @@ router.patch("/:pid", (req, res, next) => {
 
 // ****delete a place*****
 router.delete("/:pid", (req, res, next) => {
-    
+    const placeId = req.params.pid;
+    places = places.filter(p => p.id !== placeId);
+
+    res.status(200).json({ msg: 'Deleted place.' });
 })
 
 module.exports = router;
