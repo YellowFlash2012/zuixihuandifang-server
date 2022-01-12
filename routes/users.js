@@ -4,6 +4,8 @@ const router = express.Router();
 
 const { v4: uuidv4 } = require("uuid");
 
+const { check, validationResult } = require("express-validator");
+
 const HttpError = require("../models/http-error");
 
 const users = [
@@ -33,7 +35,19 @@ router.get("/", (req, res, next) => {
 })
 
 // ****users signup****
-router.post("/signup", (req, res, next) => {
+router.post("/signup", [
+    check("email").normalizeEmail().isEmail(),
+    // normalizeEmail = Test@test.io =W test@test.io
+        check("password").isLength({ min: 13 })
+], (req, res, next) => {
+    
+    // validation with express-validator
+        const errors = validationResult(req);
+        if (!errors.isEmail) {
+            console.log(errors);
+            throw new HttpError("Check email field again!", 422);
+    }
+    
     const { name, email, password } = req.body;
 
     // check for existing user

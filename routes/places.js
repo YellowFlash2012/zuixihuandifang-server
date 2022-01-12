@@ -1,6 +1,8 @@
 const express = require("express");
 
-const { v4:uuidv4 } = require("uuid");
+const { v4: uuidv4 } = require("uuid");
+
+const { check, validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
 
@@ -91,7 +93,15 @@ router.get("/user/:uid", (req, res, next) => {
 });
 
 // *****create new place******
-router.post('/', (req, res, next) => {
+router.post('/', [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()], (req, res, next) => {
+    
+    // validation with express-validator
+    const errors = validationResult(req);
+    if (!errors.isEmpty) {
+        console.log(errors);
+        throw new HttpError('Fields can NOT be empty', 422);
+    }
+
     const { title, description, coordinates, address, creator } = req.body;
 
     const createdPlace = {
@@ -109,26 +119,45 @@ router.post('/', (req, res, next) => {
 });
 
 // ***edit an existing place****
-router.patch("/:pid", (req, res, next) => {
-    const { title, description } = req.body;
-    const placeId = req.params.pid;
+router.patch(
+    "/:pid",
+    [
+        check("title").not().isEmpty(),
+        check("description").isLength({ min: 5 })
+    ],
+    (req, res, next) => {
+        
+        // validation with express-validator
+        const errors = validationResult(req);
+        if (!errors.isEmpty) {
+            console.log(errors);
+            throw new HttpError("Fields can NOT be empty", 422);
+        }
 
-    const placeToUpdate = { ...places.find(p => p.id === placeId) };
+        const { title, description } = req.body;
+        const placeId = req.params.pid;
 
-    const placeIndex = places.findIndex(p => p.id === placeId);
+        const placeToUpdate = { ...places.find((p) => p.id === placeId) };
 
-    placeToUpdate.title = title;
-    placeToUpdate.description = description;
+        const placeIndex = places.findIndex((p) => p.id === placeId);
 
-    places[placeIndex] = placeToUpdate;
+        placeToUpdate.title = title;
+        placeToUpdate.description = description;
 
-    // 201 is for created items
-    res.status(200).json({ place: placeToUpdate });
-})
+        places[placeIndex] = placeToUpdate;
+
+        // 201 is for created items
+        res.status(200).json({ place: placeToUpdate });
+    }
+);
 
 // ****delete a place*****
 router.delete("/:pid", (req, res, next) => {
     const placeId = req.params.pid;
+
+    if (!places.find(p=>p.id===placeId)) {
+        throw new HttpError('No place match that id', 404)
+    }
     places = places.filter(p => p.id !== placeId);
 
     res.status(200).json({ msg: 'Deleted place.' });
