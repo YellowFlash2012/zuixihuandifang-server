@@ -13,20 +13,27 @@ const router = express.Router();
 
 
 //***** get places by id *******
-router.get("/:pid", (req, res, next) => {
+router.get("/:pid", async (req, res, next) => {
     const placeId = req.params.pid; //{pid:'p1}
-    const place = places.find((p) => {
-        return p.id === placeId;
-    });
 
-    if (!place) {
-        throw new HttpError(
-            "Can't find a place that satisfies your request. Try with another ID",
-            404
+    let place;
+    try {
+        place = await Places.findById(placeId);
+    } catch (err) {
+        const error = new HttpError(
+            "Something went wrong, no connection with db", 500
         );
+        return next(error);
     }
+    
+    if (!place) {
+        const error = new HttpError("Can't find a place that satisfies your request. Try with another ID", 404);
 
-    res.json({ place: place });
+        return next(error);
+    }
+    
+
+    res.json({ place: place.toObject({getters:true}) });
 });
 
 
