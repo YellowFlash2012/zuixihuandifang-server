@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const placesRoutes = require('./routes/places');
 
 const usersRoutes = require('./routes/users');
+
 const HttpError = require("./models/http-error");
 
 const app = express();
