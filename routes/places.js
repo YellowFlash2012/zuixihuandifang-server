@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 const { check, validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
+const getCoordsForAddress = require("../util/location");
 
 const router = express.Router();
 
@@ -93,16 +94,25 @@ router.get("/user/:uid", (req, res, next) => {
 });
 
 // *****create new place******
-router.post('/', [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()], (req, res, next) => {
+router.post('/', [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()], async (req, res, next) => {
     
     // validation with express-validator
     const errors = validationResult(req);
     if (!errors.isEmpty) {
         console.log(errors);
-        throw new HttpError('Fields can NOT be empty', 422);
+        return next(new HttpError('Fields can NOT be empty', 422));
     }
 
-    const { title, description, coordinates, address, creator } = req.body;
+    const { title, description, address, creator } = req.body;
+
+    let coordinates;
+
+    try {
+        coordinates = await getCoordsForAddress(address);
+    } catch (error) {
+        console.log(error);
+        return next(error);
+    }
 
     const createdPlace = {
         id:uuidv4(),
