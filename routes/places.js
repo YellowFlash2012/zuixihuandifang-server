@@ -39,12 +39,19 @@ router.get("/:pid", async (req, res, next) => {
 
 // *****get places by userId *****
 
-router.get("/user/:uid", (req, res, next) => {
+router.get("/user/:uid", async (req, res, next) => {
     const userId = req.params.uid;
 
-    const userPlaces = places.filter((u) => {
-        return u.creator === userId;
-    });
+    let userPlaces;
+
+    try {
+        userPlaces = await Places.find({ creator: userId });
+    } catch (err) {
+        const error = new HttpError("Something went wrong, no connection with db", 500);
+
+        return next(error);
+    }
+    
 
     if (userPlaces.length === 0) {
         return next(
@@ -55,7 +62,9 @@ router.get("/user/:uid", (req, res, next) => {
         );
     }
 
-    res.json({ user: userPlaces });
+    res.json({
+        user: userPlaces.map((place) => place.toObject({ getters: true })),
+    });
 });
 
 // *****create new place******
