@@ -121,7 +121,7 @@ router.patch(
         const errors = validationResult(req);
         if (!errors.isEmpty) {
             console.log(errors);
-            throw new HttpError("Fields can NOT be empty", 422);
+            return next(new HttpError("Fields can NOT be empty", 422));
         }
 
         const { title, description } = req.body;
