@@ -60,7 +60,7 @@ router.post("/signup", [
             return next(new HttpError("Check email field again!", 422));
     }
     
-    const { name, email, password, image, places } = req.body;
+    const { name, email, password, image } = req.body;
 
     // check for existing user
     let existingUser;
@@ -85,7 +85,7 @@ router.post("/signup", [
         email,
         password,
         image,
-        places
+        places:[] //empty array because 1 user can have many places
     });
 
     try {

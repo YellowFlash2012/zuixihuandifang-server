@@ -8,6 +8,9 @@ const HttpError = require("../models/http-error");
 const getCoordsForAddress = require("../util/location");
 
 const Places = require("../models/places");
+const Users = require("../models/users");
+const mongoose = require("mongoose");
+
 
 const router = express.Router();
 
@@ -97,8 +100,29 @@ router.post('/', [check('title').not().isEmpty(), check('description').isLength(
         creator
     });
 
+    let user;
     try {
-        await createdPlace.save();
+        user = await Users.findById(creator);
+    } catch (err) {
+        const error = new HttpError("Can't find that user, try another one", 500);
+
+        return next(error);
+    }
+
+    if (!user) {
+        const error = new HttpError("Could not find a user with that id", 404);
+        return next(error);
+    }
+
+    try {
+        const session = await mongoose.startSession();
+        
+        session.startTransaction();
+        await createdPlace.save({ session: session });
+
+        user.places.push(createdPlace); //push allows mongoose to establish connection between the 2 models. places here refers to the name of the collection in mongoatlas
+        await user.save({ session: session });
+        await session.commitTransaction();
     } catch (err) {
         const error = new HttpError('Creating place failed, please try again!', 500);
 

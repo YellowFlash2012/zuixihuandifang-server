@@ -16,7 +16,7 @@ const placeSchema = new Schema({
         lng: { type: Number, required: true },
     },
 
-    creator: { type: String, required: true },
+    creator: { type: mongoose.Types.ObjectId, required: true, ref:"Users" }, //to establish connection btw 2 models
 });
 
 module.exports = mongoose.model("Places", placeSchema);

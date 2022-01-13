@@ -12,7 +12,7 @@ const userSchema = new Schema({
 
     password: { type: String, required: true, minlength: 13 },
     
-    places: { type: String, required: true }
+    places: [{ type: mongoose.Types.ObjectId, required: true, ref:"Places" }] //this is an array because 1 user can have many places
     
 });
 
