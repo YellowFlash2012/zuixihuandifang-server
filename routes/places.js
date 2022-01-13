@@ -184,15 +184,28 @@ router.delete("/:pid", async (req, res, next) => {
     let place;
 
     try {
-        place = await Places.findById(placeId);
+        place = await Places.findById(placeId).populate('creator');
     } catch (err) {
         const error = new HttpError("Something doesn't add up, can't delete place now.", 500);
 
         return next(error);
     }
 
+    if (!place) {
+        const error = new HttpError("Can NOT find a place with that id", 404);
+
+        return next(error);
+    }
+
     try {
-        await place.remove();
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        await place.remove({ session: session });
+
+        place.creator.places.pull(place); //places refers to the name of the collection in mongoAtlas. pull allows to remove the id from the document
+        await place.creator.save({ session: session });
+        await session.commitTransaction();
     } catch (err) {
         const error = new HttpError(
             "Something doesn't add up, can't delete place now.",
