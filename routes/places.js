@@ -115,7 +115,7 @@ router.patch(
         check("title").not().isEmpty(),
         check("description").isLength({ min: 5 })
     ],
-    (req, res, next) => {
+    async (req, res, next) => {
         
         // validation with express-validator
         const errors = validationResult(req);
@@ -127,30 +127,58 @@ router.patch(
         const { title, description } = req.body;
         const placeId = req.params.pid;
 
-        const placeToUpdate = { ...places.find((p) => p.id === placeId) };
+        let placeToUpdate;
 
-        const placeIndex = places.findIndex((p) => p.id === placeId);
+        try {
+            placeToUpdate = await Places.findById(placeId);
+        } catch (err) {
+            const error = new HttpError("Can't fetch data from db, try again later", 500);
+
+            return next(error);
+        }
 
         placeToUpdate.title = title;
         placeToUpdate.description = description;
 
-        places[placeIndex] = placeToUpdate;
+        try {
+            await placeToUpdate.save();
+        } catch (err) {
+            const error = new HttpError("Can't update place now, please try again later", 500);
+
+            return next(error);
+        }
 
         // 201 is for created items
-        res.status(200).json({ place: placeToUpdate });
+        res.status(200).json({ place: placeToUpdate.toObject({ getters: true }) });
     }
 );
 
 // ****delete a place*****
-router.delete("/:pid", (req, res, next) => {
+router.delete("/:pid", async (req, res, next) => {
     const placeId = req.params.pid;
 
-    if (!places.find(p=>p.id===placeId)) {
-        throw new HttpError('No place match that id', 404)
-    }
-    places = places.filter(p => p.id !== placeId);
+    let place;
 
-    res.status(200).json({ msg: 'Deleted place.' });
+    try {
+        place = await Places.findById(placeId);
+    } catch (err) {
+        const error = new HttpError("Something doesn't add up, can't delete place now.", 500);
+
+        return next(error);
+    }
+
+    try {
+        await place.remove();
+    } catch (err) {
+        const error = new HttpError(
+            "Something doesn't add up, can't delete place now.",
+            500
+        );
+
+        return next(error);
+    }
+
+    res.status(200).json({ msg: 'Place deleted.' });
 })
 
 module.exports = router;
