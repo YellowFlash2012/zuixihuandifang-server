@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 
 const { check, validationResult } = require("express-validator");
 
@@ -60,7 +60,7 @@ router.post("/signup", [
             return next(new HttpError("Check email field again!", 422));
     }
     
-    const { name, email, password, image } = req.body;
+    const { name, email, password} = req.body;
 
     // check for existing user
     let existingUser;
@@ -80,12 +80,11 @@ router.post("/signup", [
     }
 
     const createdUser = new Users({
-        
         name, //name:name
         email,
         password,
-        image,
-        places:[] //empty array because 1 user can have many places
+        image: "https://images.unsplash.com/photo-1631646109206-4b5616964f84?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8a2lsaW1hbmphcm98ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60",
+        places: [], //empty array because 1 user can have many places
     });
 
     try {

@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 
 const { check, validationResult } = require("express-validator");
 
@@ -184,7 +184,7 @@ router.delete("/:pid", async (req, res, next) => {
     let place;
 
     try {
-        place = await Places.findById(placeId).populate('creator');
+        place = await Places.findById(placeId).populate('creator'); //populate() makes it easy to access documents stored in different collections
     } catch (err) {
         const error = new HttpError("Something doesn't add up, can't delete place now.", 500);
 
