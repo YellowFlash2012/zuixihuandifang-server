@@ -48,15 +48,15 @@ router.get("/user/:uid", async (req, res, next) => {
     let userPlaces;
 
     try {
-        userPlaces = await Places.find({ creator: userId });
+        userPlaces = await Users.findById(userId).populate('places');
     } catch (err) {
-        const error = new HttpError("Something went wrong, no connection with db", 500);
+        const error = new HttpError("Fetching places failed", 500);
 
         return next(error);
     }
     
 
-    if (userPlaces.length === 0) {
+    if (!userPlaces || userPlaces.length === 0) {
         return next(
             new HttpError(
                 "Can't find anything related to that user. Try another one!",
@@ -66,7 +66,7 @@ router.get("/user/:uid", async (req, res, next) => {
     }
 
     res.json({
-        user: userPlaces.map((place) => place.toObject({ getters: true })),
+        places: userPlaces.places.map((place) => place.toObject({ getters: true })),
     });
 });
 

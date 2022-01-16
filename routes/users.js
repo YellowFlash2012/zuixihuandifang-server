@@ -10,6 +10,8 @@ const Users = require("../models/users");
 
 const HttpError = require("../models/http-error");
 
+const fileUpload = require("../middleware/file-upload");
+
 const users = [
     {
         id: "u1",
@@ -47,7 +49,7 @@ router.get("/", async (req, res, next) => {
 })
 
 // ****users signup****
-router.post("/signup", [
+router.post("/signup", fileUpload.single('image') [
     check("email").normalizeEmail().isEmail(),
     // normalizeEmail = Test@test.io => test@test.io
         check("password").isLength({ min: 13 })
