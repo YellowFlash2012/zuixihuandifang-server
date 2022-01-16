@@ -48,14 +48,17 @@ app.use((error, req, res, next) => {
 
 // ****db connection****
 mongoose
-    .connect(process.env.MONGO_URI)
+    .connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
     .then(
         app.listen(5000, () => {
             console.log("Server on | Port 5000");
             console.log("db connected!");
         })
     )
-    .catch(err => {
+    .catch((err) => {
         console.log(err);
     });
 

@@ -71,7 +71,8 @@ router.get("/user/:uid", async (req, res, next) => {
 });
 
 // *****create new place******
-router.post('/', [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()], async (req, res, next) => {
+// [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()],
+router.post('/', async (req, res, next) => {
     
     // validation with express-validator
     const errors = validationResult(req);
@@ -80,7 +81,7 @@ router.post('/', [check('title').not().isEmpty(), check('description').isLength(
         return next(new HttpError('Fields can NOT be empty', 422));
     }
 
-    const { title, description, address, image, creator } = req.body;
+    const { title, description, address, creator } = req.body;
 
     let coordinates;
 
@@ -95,9 +96,9 @@ router.post('/', [check('title').not().isEmpty(), check('description').isLength(
         title,
         description,
         location: coordinates,
-        image,
+        image: "https://images.unsplash.com/photo-1631646109206-4b5616964f84?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8a2lsaW1hbmphcm98ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60",
         address,
-        creator
+        creator,
     });
 
     let user;
@@ -123,10 +124,13 @@ router.post('/', [check('title').not().isEmpty(), check('description').isLength(
         user.places.push(createdPlace); //push allows mongoose to establish connection between the 2 models. places here refers to the name of the collection in mongoatlas
         await user.save({ session: session });
         await session.commitTransaction();
+        console.log(session, user.places);
     } catch (err) {
         const error = new HttpError('Creating place failed, please try again!', 500);
 
         return next(error);
+
+        
     }
 
     res.status(201).json({place:createdPlace})

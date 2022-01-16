@@ -123,7 +123,7 @@ router.post("/login", async (req, res, next) => {
         return next(error);
     }
 
-    res.json({msg:'Login Successful'})
+    res.json({ msg: 'Login Successful', user: existingUser.toObject({ getters: true }) });
 })
 
 
