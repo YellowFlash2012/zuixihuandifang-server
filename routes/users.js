@@ -49,7 +49,7 @@ router.get("/", async (req, res, next) => {
 })
 
 // ****users signup****
-router.post("/signup", fileUpload.single('image') [
+router.post("/signup", fileUpload.single('image'), [
     check("email").normalizeEmail().isEmail(),
     // normalizeEmail = Test@test.io => test@test.io
         check("password").isLength({ min: 13 })
