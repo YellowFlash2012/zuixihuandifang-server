@@ -12,6 +12,8 @@ const HttpError = require("../models/http-error");
 
 const fileUpload = require("../middleware/file-upload");
 
+const bcrypt = require("bcryptjs");
+
 const users = [
     {
         id: "u1",
@@ -81,10 +83,18 @@ router.post("/signup", fileUpload.single('image'), [
         return next(error);
     }
 
+    let hashedpw;
+    try {
+        hashedpw = await bcrypt.hash(password, 13);
+    } catch (error) {
+        const error = new HttpError("Could not create user, please try again", 500);
+        return next(error)
+    }
+
     const createdUser = new Users({
         name, //name:name
         email,
-        password,
+        password:hashedpw,
         image: req.file.path,
         places: [], //empty array because 1 user can have many places
     });
