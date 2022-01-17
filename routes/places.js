@@ -173,6 +173,7 @@ router.patch(
             return next(error);
         }
 
+        //authorization to prevent any user from updating the place from the backend
         if (place.creator.toString() !== req.userData.userId) {
             const error = new HttpError("You are not allowed to edit this place.", 401);
 
@@ -202,15 +203,28 @@ router.delete("/:pid", async (req, res, next) => {
     let place;
 
     try {
-        place = await Places.findById(placeId).populate('creator'); //populate() makes it easy to access documents stored in different collections
+        place = await Places.findById(placeId).populate("creator"); //populate() makes it easy to access documents stored in different collections
     } catch (err) {
-        const error = new HttpError("Something doesn't add up, can't delete place now.", 500);
+        const error = new HttpError(
+            "Something doesn't add up, can't delete place now.",
+            500
+        );
 
         return next(error);
     }
 
     if (!place) {
         const error = new HttpError("Can NOT find a place with that id", 404);
+
+        return next(error);
+    }
+
+    //authorization to prevent any user from deleting the place from the backend
+    if (place.creator.id !== req.userData.userId) {
+        const error = new HttpError(
+            "You are not allowed to delete this place.",
+            401
+        );
 
         return next(error);
     }
@@ -235,11 +249,11 @@ router.delete("/:pid", async (req, res, next) => {
         return next(error);
     }
 
-    fs.unlink(imagePath, err => {
+    fs.unlink(imagePath, (err) => {
         console.log(err);
-    })
+    });
 
-    res.status(200).json({ msg: 'Place deleted.' });
+    res.status(200).json({ msg: "Place deleted." });
 })
 
 module.exports = router;
