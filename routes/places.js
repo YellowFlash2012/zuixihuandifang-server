@@ -89,7 +89,7 @@ router.post('/', fileUpload.single('image'), async (req, res, next) => {
         return next(new HttpError('Fields can NOT be empty', 422));
     }
 
-    const { title, description, address, creator } = req.body;
+    const { title, description, address } = req.body;
 
     let coordinates;
 
@@ -106,12 +106,12 @@ router.post('/', fileUpload.single('image'), async (req, res, next) => {
         location: coordinates,
         image: req.file.path,
         address,
-        creator,
+        creator:req.userData.userId,
     });
 
     let user;
     try {
-        user = await Users.findById(creator);
+        user = await Users.findById(req.userData.userId);
     } catch (err) {
         const error = new HttpError("Can't find that user, try another one", 500);
 
