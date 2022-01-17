@@ -73,6 +73,9 @@ router.get("/user/:uid", async (req, res, next) => {
     });
 });
 
+// *****middleware to protect sensible routes****
+
+
 // *****create new place******
 // [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()],
 router.post('/', fileUpload.single('image'), async (req, res, next) => {
