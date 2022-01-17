@@ -86,7 +86,7 @@ router.post("/signup", fileUpload.single('image'), [
     let hashedpw;
     try {
         hashedpw = await bcrypt.hash(password, 13);
-    } catch (error) {
+    } catch (err) {
         const error = new HttpError("Could not create user, please try again", 500);
         return next(error)
     }
@@ -127,10 +127,29 @@ router.post("/login", async (req, res, next) => {
         return next(error);
     }
 
-    if (!existingUser || existingUser.password !== password) {
+    if (!existingUser) {
         console.log(existingUser.password);
         console.log(password);
-        const error = new HttpError("Invalid credentials", 401);
+        const error = new HttpError("A user with this account could NOT be found", 401);
+
+        return next(error);
+    }
+
+    let isValidPassword = false;
+
+    try {
+        isValidPassword = await bcrypt.compare(password, existingUser.password);
+    } catch (err) {
+        const error = new HttpError("Invalid credentails", 500);
+
+        return next(error);
+    }
+
+    if (!isValidPassword) {
+        const error = new HttpError(
+            "A user with this account could NOT be found",
+            401
+        );
 
         return next(error);
     }
