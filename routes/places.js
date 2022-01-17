@@ -10,6 +10,7 @@ const getCoordsForAddress = require("../util/location");
 const Places = require("../models/places");
 const Users = require("../models/users");
 const mongoose = require("mongoose");
+const fileUpload = require("../middleware/file-upload");
 
 
 const router = express.Router();
@@ -72,7 +73,7 @@ router.get("/user/:uid", async (req, res, next) => {
 
 // *****create new place******
 // [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()],
-router.post('/', async (req, res, next) => {
+router.post('/', fileUpload.single('image'), async (req, res, next) => {
     
     // validation with express-validator
     const errors = validationResult(req);
@@ -96,7 +97,7 @@ router.post('/', async (req, res, next) => {
         title,
         description,
         location: coordinates,
-        image: "https://images.unsplash.com/photo-1631646109206-4b5616964f84?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8a2lsaW1hbmphcm98ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60",
+        image: req.file.path,
         address,
         creator,
     });
