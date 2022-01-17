@@ -14,6 +14,8 @@ const fileUpload = require("../middleware/file-upload");
 
 const bcrypt = require("bcryptjs");
 
+const jwt = require("jsonwebtoken");
+
 const users = [
     {
         id: "u1",
@@ -83,6 +85,7 @@ router.post("/signup", fileUpload.single('image'), [
         return next(error);
     }
 
+    // bcrypt config
     let hashedpw;
     try {
         hashedpw = await bcrypt.hash(password, 13);
@@ -107,7 +110,27 @@ router.post("/signup", fileUpload.single('image'), [
         return next(error);
     }
 
-    res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+    // jwt config
+    let token;
+    try {
+        token = jwt.sign(
+            {
+                userId: createdUser.id,
+                email: createdUser.email,
+            },
+            "process.env.jwt_token",
+            { expiresIn: "1h" }
+        );
+    } catch (err) {
+        const error = new HttpError(
+            "Could not signup right now, please try again later.",
+            500
+        );
+
+        return next(error);
+    }
+
+    res.status(201).json({ userId: createdUser.id, email:createdUser.email, token:token });
 })
 
 // ****users login****
@@ -130,7 +153,10 @@ router.post("/login", async (req, res, next) => {
     if (!existingUser) {
         console.log(existingUser.password);
         console.log(password);
-        const error = new HttpError("A user with this account could NOT be found", 401);
+        const error = new HttpError(
+            "A user with this account could NOT be found",
+            401
+        );
 
         return next(error);
     }
@@ -154,7 +180,32 @@ router.post("/login", async (req, res, next) => {
         return next(error);
     }
 
-    res.json({ msg: 'Login Successful', user: existingUser.toObject({ getters: true }) });
+    // jwt config
+    let token;
+    try {
+        token = jwt.sign(
+            {
+                userId: existingUser.id,
+                email: existingUser.email,
+            },
+            "process.env.jwt_token",
+            { expiresIn: "1h" }
+        );
+    } catch (err) {
+        const error = new HttpError(
+            "Could not login right now, please try again later.",
+            500
+        );
+
+        return next(error);
+    }
+
+    res.json({
+        userId: existingUser.id,
+        email: existingUser.email,
+        token: token,
+        
+    });
 })
 
 
