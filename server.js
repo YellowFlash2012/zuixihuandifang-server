@@ -1,5 +1,8 @@
 const express = require("express");
 
+const fs = require("fs");
+const path = require('path');
+
 const bodyParser = require("body-parser");
 
 const placesRoutes = require('./routes/places');
@@ -10,10 +13,14 @@ let dotenv = require("dotenv").config();
 const usersRoutes = require('./routes/users');
 
 const HttpError = require("./models/http-error");
+const { log } = require("console");
 
 const app = express();
 
 app.use(bodyParser.json());
+
+//middleware for handling static file upload, like images
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 // ****CORS handling****
 app.use((req, res, next) => {
@@ -37,6 +44,12 @@ app.use((req, res, next) => {
 
 // error handling middleware
 app.use((error, req, res, next) => {
+    // image upload error config
+    if (req.file) {
+        fs.unlink(req.file.path, err => {
+            console.log(err);
+        });
+    }
     if (res.headersSent) {
         return next(error);
     }

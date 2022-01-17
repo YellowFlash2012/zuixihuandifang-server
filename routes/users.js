@@ -85,7 +85,7 @@ router.post("/signup", fileUpload.single('image'), [
         name, //name:name
         email,
         password,
-        image: "https://images.unsplash.com/photo-1631646109206-4b5616964f84?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8a2lsaW1hbmphcm98ZW58MHx8MHx8&auto=format&fit=crop&w=600&q=60",
+        image: req.file.path,
         places: [], //empty array because 1 user can have many places
     });
 
