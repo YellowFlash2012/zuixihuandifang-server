@@ -14,6 +14,8 @@ const Users = require("../models/users");
 const mongoose = require("mongoose");
 const fileUpload = require("../middleware/file-upload");
 
+const checkAuth = require("../middleware/check-auth");
+
 
 const router = express.Router();
 
@@ -74,7 +76,7 @@ router.get("/user/:uid", async (req, res, next) => {
 });
 
 // *****middleware to protect sensible routes****
-
+router.use(checkAuth);
 
 // *****create new place******
 // [check('title').not().isEmpty(), check('description').isLength({ min: 5 }), check('address').not().isEmpty()],
@@ -167,6 +169,12 @@ router.patch(
             placeToUpdate = await Places.findById(placeId);
         } catch (err) {
             const error = new HttpError("Can't fetch data from db, try again later", 500);
+
+            return next(error);
+        }
+
+        if (place.creator.toString() !== req.userData.userId) {
+            const error = new HttpError("You are not allowed to edit this place.", 401);
 
             return next(error);
         }
