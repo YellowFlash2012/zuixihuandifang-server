@@ -22,6 +22,8 @@ app.use(bodyParser.json());
 //middleware for handling static file upload, like images
 app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
+app.use(express.static(path.join("public")));
+
 // ****CORS handling****
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -34,6 +36,11 @@ app.use((req, res, next) => {
 app.use('/api/places', placesRoutes);
 
 app.use('/api/users', usersRoutes);
+
+// for serving the frontend
+app.use((req, res, next) => {
+    res.sendFile(path.resolve(__dirname, "public", "index.html"));
+})
 
 //*** wrong route error handling***
 app.use((req, res, next) => {
@@ -66,7 +73,7 @@ mongoose
         useUnifiedTopology: true,
     })
     .then(
-        app.listen(5000, () => {
+        app.listen(process.env.PORT || 5000, () => {
             console.log("Server on | Port 5000");
             console.log("db connected!");
         })
