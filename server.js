@@ -20,6 +20,8 @@ app.use(express.json())
 app.use(cors())
 app.use(helmet())
 
+const PORT = process.env.PORT || 5000;
+
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
 }
@@ -87,8 +89,8 @@ mongoose
         
     })
     .then(
-        app.listen(process.env.PORT || 5000, () => {
-            console.log("Server on | Port 5000");
+        app.listen(PORT, () => {
+            console.log(`Server on | Port ${PORT}`);
             console.log("db connected!".cyan.underline.bold);
         })
     )
