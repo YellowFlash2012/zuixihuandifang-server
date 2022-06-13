@@ -2,7 +2,7 @@
 ![zuixihuandifang](client/public/zuixihuandifang.png)
 Full stack MERN project
 
-<a href="">Live preview</a>
+<a href="https://zuixihuandifang.herokuapp.com/">Live preview</a>
 
 Project scope: This project is inspired by Maximilian MERN udemy course on .
 It's about a simple app that allows users to signup, login, upload info, inclusing an image, about places they like or have visited, edit those info later on or simply delete a place from their profile.

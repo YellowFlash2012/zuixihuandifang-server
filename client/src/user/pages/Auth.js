@@ -125,9 +125,10 @@ const Auth = () => {
                 console.log(data);
                 auth.login(data.userId, data.token);
                 message.success("Thank you for signing up")
+                navigate("/")
             } catch (err) {
                 console.log(err);
-                
+                message.error(`${err}`)
             }
         }
 
