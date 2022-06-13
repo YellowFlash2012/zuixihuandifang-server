@@ -151,7 +151,7 @@ router.post("/login", async (req, res, next) => {
     }
 
     if (!existingUser) {
-        console.log(existingUser.password);
+        console.log(existingUser);
         console.log(password);
         const error = new HttpError(
             "A user with this account could NOT be found",

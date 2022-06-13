@@ -3,21 +3,26 @@ const express = require("express");
 const fs = require("fs");
 const path = require('path');
 
-const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const cors = require("cors")
+const helmet = require("helmet")
+const colors = require("colors")
+const morgan=require("morgan")
 
 const placesRoutes = require('./routes/places');
+const usersRoutes = require('./routes/users');
+const HttpError = require("./models/http-error");
 
-const mongoose = require("mongoose");
 let dotenv = require("dotenv").config();
 
-const usersRoutes = require('./routes/users');
-
-const HttpError = require("./models/http-error");
-const { log } = require("console");
-
 const app = express();
+app.use(express.json())
+app.use(cors())
+app.use(helmet())
 
-app.use(bodyParser.json());
+if (process.env.NODE_ENV === "development") {
+    app.use(morgan("dev"));
+}
 
 //middleware for handling static file upload, like images
 app.use('/uploads/images', express.static(path.join('uploads', 'images')));
@@ -25,22 +30,32 @@ app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 app.use(express.static(path.join("public")));
 
 // ****CORS handling****
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+// app.use((req, res, next) => {
+//     res.setHeader("Access-Control-Allow-Origin", "*");
+//     res.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+//     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
 
-    next();
-});
+//     next();
+// });
 
 app.use('/api/places', placesRoutes);
 
 app.use('/api/users', usersRoutes);
 
 // for serving the frontend
-app.use((req, res, next) => {
-    res.sendFile(path.resolve(__dirname, "public", "index.html"));
-})
+// const __dirname = path.resolve();
+
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "/client/build")));
+
+    app.get("*", (req, res) =>
+        res.sendFile(path.resolve(__dirname, "client", "build", "index.html"))
+    );
+} else {
+    app.get("/", (req, res) => {
+        res.send("API is running....");
+    });
+}
 
 //*** wrong route error handling***
 app.use((req, res, next) => {
@@ -69,13 +84,12 @@ app.use((error, req, res, next) => {
 // ****db connection****
 mongoose
     .connect(process.env.MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
+        
     })
     .then(
         app.listen(process.env.PORT || 5000, () => {
             console.log("Server on | Port 5000");
-            console.log("db connected!");
+            console.log("db connected!".cyan.underline.bold);
         })
     )
     .catch((err) => {
